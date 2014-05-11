@@ -1,0 +1,359 @@
+#######################################################################
+# HTML
+#######################################################################
+snippet nb
+	&nbsp;
+snippet doc HTML 5
+	<!DOCTYPE HTML>
+
+snippet doc HTML 4.01 Strict
+	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+snippet doc HTML 4.01 Transitional
+	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+snippet doc HTML 4.01 frameset
+	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
+
+snippet doc XHTML 1.0 Strict
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+snippet doc XHTML 1.0 Transitional
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+snippet doc XHTML 1.0 Frameset
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+
+snippet doc XHTML 1.1
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+snippet doc XHTML Basic 1.1
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.1//EN" "http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd">
+
+snippet html
+	<!DOCTYPE HTML>
+	<html>
+		${1}
+	</html>
+snippet xhtml
+	<html xmlns="http://www.w3.org/1999/xhtml">
+		${1}
+	</html>
+snippet body
+	<body>
+		${1}
+	</body>
+snippet head
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />${2}
+		<title>${1:`substitute(Filename('', 'Page Title'), '^.', '\u&', '')`}</title>
+	</head>
+snippet title
+	<title>${1:`substitute(Filename('', 'Page Title'), '^.', '\u&', '')`}</title>${2}
+snippet jse
+	<script type="text/javascript" charset="utf-8">
+		<!--
+		${1}
+		//-->
+	</script>${2}
+snippet js
+	<script src="${1}.js" type="text/javascript" charset="utf-8"></script>${2}
+snippet cse
+	<style type="text/css" media="${1:all}">
+		${2}
+	</style>${3}
+snippet css
+	<link href="${1}.css" type="text/css" rel="stylesheet" media="${2:all}" />
+snippet base
+	<base href="${1}" target="${2}" />
+snippet br
+	<br />
+snippet hr
+	<hr />
+snippet div
+	<div id="${1:name}">
+		${2}
+	</div>
+snippet span
+	<span class="${1:name}">${2}</span>
+snippet p
+	<p>${1}</p>
+snippet a
+	<a href="${1}" target="${2:_blank}">${3}</a>
+snippet fs
+	<fieldset id="${1}">
+		<legend>${2:name}</legend>
+		${3}
+	</fieldset>
+snippet form
+	<form action="${1}" method="${2:post}" accept-charset="utf-8">
+		${3}
+		<input type="submit" value="${4:Submit}" />
+	</form>
+snippet h1
+	<h1>${1}</h1>
+snippet h2
+	<h2>${1}</h2>
+snippet h3
+	<h3>${1}</h3>
+snippet h4
+	<h4>${1}</h4>
+snippet h5
+	<h5>${1}</h5>
+snippet h6
+	<h6>${1}</h6>
+snippet inp
+	<input type="${1}" id="${2:id}" name="${3:$2}" value="${4}" />${5}
+snippet lab
+	<label for="${2:id}">${1}</label>
+	<input type="${3}" id="${4:$2}" name="${5:$2}" value="${6}" />${7}
+snippet mail
+	<a href="mailto:${1:a@a.com}">${2:$1}</a>
+snippet sel
+	<select id="${1:id}" name="${2:$1}">
+		<option value="${3:value}">${4:$3}</option>
+	</select>${5}
+snippet opt
+	<option value="${1:value}">${2:$1}</option>${3}
+snippet tab
+	<table border="${1:0}">
+		<tr>
+			<th>
+				${2:Header}
+			</th>
+		</tr>
+		<tr>
+			<td>
+				${3:Content}
+			</td>
+		</tr>
+	</table>${4}
+snippet txt
+	<textarea id="${1:id}" name="${2:$1}">${3}</textarea>${4}
+snippet img
+	<img src="${1}" alt="${2}" />
+snippet ul
+	<ul>
+		<li>${1}</li>
+	</ul>
+snippet ol
+	<ol>
+		<li>${1}</li>
+	</ol>
+snippet li
+	<li>${1}</li>
+snippet dl
+	<dl>
+		<dt>${1}</dt>
+		<dd>${2}</dd>
+	</dl>
+snippet dt
+	<dt>${1}</dt>
+snippet dd
+	<dd>${1}</dd>
+#######################################################################
+# PHP
+#######################################################################
+snippet docp
+	/**
+	 * @package ${1:Package}
+	 */
+snippet docc
+	/**
+	 * ${1:Description}
+	 *
+	 * @package ${2:Package}
+	 * @subpackage ${3:Sub package}
+	 */
+snippet docf
+	/**
+	 * ${1:Description}
+	 *
+	 * @param ${2:Type} ${3:Name} ${4:Description}
+	 * @return ${5:type} ${6:Description}
+	 */
+snippet docv
+	/**
+	 * ${1:Short description}
+	 *
+	 * @var ${2:Type}
+	 */
+snippet docg
+	/**
+	 * ${1:Description}
+	 */
+snippet vd
+	var_dump(${1});
+snippet arr
+	array(${1})
+snippet cou
+	count($${1})
+snippet class
+	class ${1:ClassName}
+	{
+		${2}
+		${3:public }function __construct(${4})
+		{
+			${5}
+		}
+
+	}
+snippet def
+	define("${1}" ,${2});
+snippet for
+	for ($${2:x} = 0; $$2 < count($${1}); $$2${3:++})
+	{
+		${4}
+	}
+snippet fore
+	foreach ($${1:list} as $${2:key} => $${3:value})
+	{
+		${4}
+	}
+snippet wh
+	while (${1})
+	{
+		${2}
+	}
+snippet do
+	do
+	{
+		${2}
+	} while (${1})
+snippet func
+	${1:protected} function ${2:FunctionName}(${3})
+	{
+		${4}
+	}
+snippet hea
+	header("Location: ${1}");
+snippet if
+	if (${1})
+	{
+		${2}
+	}${3}
+snippet elf
+	else if (${1})
+	{
+		${2}
+	}${3}
+snippet el
+	else
+	{
+		${1}
+	}${2}
+snippet iss
+	isset($${1:var})
+snippet isn
+	is_null($${1:var})
+snippet isnu
+	is_numeric($${1:var})
+snippet isa
+	is_array($${1:var})
+snippet isd
+	is_dir($${1:var})
+snippet ina
+	in_array($${1:value}, $${2:array})
+snippet emp
+	emp($${1:var})
+snippet pri
+	print(${1});
+snippet prf
+	printf("%s", $${1});
+snippet pr
+	private ${1}
+snippet pu
+	public ${1}
+snippet pro
+	protected ${1}
+snippet php
+	<?php
+
+		${1}
+
+	?>
+snippet phpi
+	<?php ${1} ?>
+snippet swi
+	switch($${1})
+	{
+		case "${2}":
+			${3}
+			break;
+
+		default:
+			${4}
+			break;
+	}
+snippet th
+	$this->${1}
+snippet req
+	require("${1}");
+snippet reqo
+	require_once("${1}");
+snippet __ Constructor
+	${1:public} function __construct(${2})
+	{
+		${3}
+	}
+snippet __ Destructor
+	${1:public} function __destruct()
+	{
+		${2}
+	}
+snippet __ Get
+	public function __get($Parameter)
+	{
+		${1}
+	}
+snippet __ Set
+	public function __set($Parameter, $Value)
+	{
+		${1}
+	}
+snippet __ Call
+	public function __call($Name, $Args)
+	{
+		${1}
+	}
+snippet __ Call Static
+	public function __callStatic($Name, $Args)
+	{
+		${1}
+	}
+snippet __ IsSet
+	public function __isset($Parameter)
+	{
+		${1}
+	}
+snippet __ UnSet
+	public function __unset($Parameter)
+	{
+		${1}
+	}
+snippet __ Sleep
+	public function __sleep()
+	{
+		${1}
+	}
+snippet __ Wake Up
+	public function __wakeup()
+	{
+		${1}
+	}
+snippet __ To String
+	public function __toString()
+	{
+		${1}
+	}
+snippet __ Invoke
+	public function __invoke($Args)
+	{
+		${1}
+	}
+snippet __c
+	${1:public} function __construct(${2})
+	{
+		${3}
+	}
+snippet fileend
