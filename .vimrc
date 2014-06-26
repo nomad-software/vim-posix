@@ -38,13 +38,14 @@
 	set whichwrap+=<,>,h,l,[,]												"Make sure cursor movement keys wrap at line ends.
 	set backspace=indent,eol,start											"Use backspace to move through text in normal mode.
 	set linebreak															"Word wrap on words not characters.
+	set breakindent															"Handle indenting wrapping lines.
 
 	set ignorecase															"Case insensitive by default.
 	set smartcase															"Case-sensitive only if there is a capital letter in the expression.
 	set incsearch															"Do incremental searching.
 	set hlsearch															"Highlight searches.
 	set listchars=tab:»\ ,trail:«											"Set whitespace characters.
-	set list																"Turn whitespace characters on.
+	set list																"Turn whitespace characters on. Disables linebreak.
 	set fillchars=vert:\ ,fold:-,diff:-										"Set the characters used in ui elements.
 
 	set nobackup															"Don't use backups.
