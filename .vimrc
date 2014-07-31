@@ -76,7 +76,7 @@
 	if has('gui_running')
 
 		if s:uname == 'Linux'
-			set guifont=DeJaVu\ Sans\ Mono\ 10								"Set the editor font.
+			set guifont=DeJaVu\ Sans\ Mono\ 11								"Set the editor font.
 		elseif s:uname == 'Darwin'
 			set guifont=DeJaVu_Sans_Mono:h12								"Set the editor font.
 		endif
@@ -85,8 +85,8 @@
 		set guicursor=a:blinkon0											"Turn off cursor flashing for all modes.
 		set cursorline														"Highlight current line.
 
-		set lines=60														"Set the initial height of the editor.
-		set columns=169														"Set the initial width of the editor.
+		set lines=65														"Set the initial height of the editor.
+		set columns=177														"Set the initial width of the editor.
 
 		set noerrorbells													"Don't make noise.
 		set novisualbell													"Don't blink.
@@ -259,10 +259,4 @@
 		\     ['print(', 'print_r(', 'var_dump(', 'error_log('],
 		\     ['writeln(', 'writefln('],
 		\ ]																	"Define custom switches.
-
-"==========================================================================
-" AFTER
-"==========================================================================
-
-	source $HOME/.vim/bundle/snipmate/after/plugin/snipMate.vim				"Load after other plugins. Pathogen doesn't load scripts in the 'after' dir.
 

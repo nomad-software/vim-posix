@@ -3,33 +3,6 @@
 #######################################################################
 snippet nb
 	&nbsp;
-snippet doc HTML 5
-	<!DOCTYPE HTML>
-
-snippet doc HTML 4.01 Strict
-	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-
-snippet doc HTML 4.01 Transitional
-	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-
-snippet doc HTML 4.01 frameset
-	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
-
-snippet doc XHTML 1.0 Strict
-	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-
-snippet doc XHTML 1.0 Transitional
-	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-snippet doc XHTML 1.0 Frameset
-	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
-
-snippet doc XHTML 1.1
-	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-
-snippet doc XHTML Basic 1.1
-	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.1//EN" "http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd">
-
 snippet html
 	<!DOCTYPE HTML>
 	<html>
@@ -71,7 +44,7 @@ snippet br
 snippet hr
 	<hr />
 snippet div
-	<div id="${1:name}">
+	<div class="${1:name}">
 		${2}
 	</div>
 snippet span
@@ -81,7 +54,7 @@ snippet p
 snippet a
 	<a href="${1}" target="${2:_blank}">${3}</a>
 snippet fs
-	<fieldset id="${1}">
+	<fieldset class="${1}">
 		<legend>${2:name}</legend>
 		${3}
 	</fieldset>
@@ -116,15 +89,15 @@ snippet sel
 snippet opt
 	<option value="${1:value}">${2:$1}</option>${3}
 snippet tab
-	<table border="${1:0}">
+	<table>
 		<tr>
 			<th>
-				${2:Header}
+				${1:Header}
 			</th>
 		</tr>
 		<tr>
 			<td>
-				${3:Content}
+				${2:Content}
 			</td>
 		</tr>
 	</table>${4}
@@ -178,7 +151,7 @@ snippet docv
 	 *
 	 * @var ${2:Type}
 	 */
-snippet docg
+snippet doc
 	/**
 	 * ${1:Description}
 	 */
@@ -221,7 +194,7 @@ snippet do
 		${2}
 	} while (${1})
 snippet func
-	${1:protected} function ${2:FunctionName}(${3})
+	${1:private} function ${2:FunctionName}(${3})
 	{
 		${4}
 	}
@@ -255,7 +228,7 @@ snippet isd
 snippet ina
 	in_array($${1:value}, $${2:array})
 snippet emp
-	emp($${1:var})
+	empty($${1:var})
 snippet pri
 	print(${1});
 snippet prf
@@ -273,7 +246,9 @@ snippet php
 
 	?>
 snippet phpi
-	<?php ${1} ?>
+	<? ${1} ?>
+snippet php=
+	<?= ${1} ?>
 snippet swi
 	switch($${1})
 	{
