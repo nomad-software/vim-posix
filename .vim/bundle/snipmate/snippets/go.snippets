@@ -1,0 +1,75 @@
+snippet main
+	/**
+	 * Package.
+	 */
+	package main
+
+	/**
+	 * Imports.
+	 */
+	import "fmt"
+
+	/**
+	 * Main entry point.
+	 */
+	func main() {
+		fmt.Println("${1:Hello World!}")
+	}
+snippet doc
+	/**
+	 * ${1}
+	 */
+snippet pr
+	fmt.Println(${1})
+snippet pf
+	fmt.Printf("${1:%#v}\n", ${2:data})
+snippet sp
+	fmt.Sprintf("${1:%#v}", ${2:data})
+snippet for
+	for ${2:x} := 0; $2 < ${1}; $2${3:++} {
+		${4}
+	}
+snippet forr
+	for ${1:index}, ${2:element} := range ${3:slice} {
+		${4}
+	}
+snippet fun
+	func ${1:function}(${2}) ${3:returns} {
+		${4}
+	}
+snippet funr
+	func (${1:receiver}) ${2:function}(${3}) ${4:returns} {
+		${5}
+	}
+snippet if
+	if ${1} {
+		${2}
+	}
+snippet elf
+	else if ${1} {
+		${2}
+	}
+snippet el
+	else {
+		${1}
+	}
+snippet swi
+	switch ${1} {
+
+		case ${2}:
+			${3}
+			break;
+
+		default:
+			${4}
+			break;
+	}
+snippet st
+	type ${1:Name} struct {
+		${2}
+	}
+snippet in
+	type ${1:Name} interface {
+		${2}
+	}
+snippet fileend
