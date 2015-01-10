@@ -141,7 +141,11 @@
 " AUTO COMMANDS
 "==========================================================================
 
+	" Fold D source unit tests.
 	autocmd BufRead *.d silent! g/^unittest\>/normal! Vj%zfgg
+
+	" Disable the bell.
+	autocmd! GUIEnter * set vb t_vb=										"Don't make noise on MacOS.
 
 "==========================================================================
 " CTAGS
