@@ -30,7 +30,7 @@ snippet for
 		${4}
 	}
 snippet forr
-	for ${1:index}, ${2:element} := range ${3:slice} {
+	for ${1:_}, ${2:element} := range ${3:slice} {
 		${4}
 	}
 snippet fun
@@ -38,7 +38,7 @@ snippet fun
 		${4}
 	}
 snippet funr
-	func (${1:receiver}) ${2:function}(${3}) ${4:returns} {
+	func (this ${1:receiver}) ${2:function}(${3}) ${4:returns} {
 		${5}
 	}
 snippet if
