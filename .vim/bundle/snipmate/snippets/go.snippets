@@ -58,11 +58,20 @@ snippet swi
 
 		case ${2}:
 			${3}
-			break;
+			fallthrough
 
 		default:
 			${4}
-			break;
+	}
+snippet sel
+	select {
+
+		case ${1:message} := <- ${2:channel}:
+			${3}
+		case <- time.After(time.Second):
+			${4}
+		default:
+			${5}
 	}
 snippet st
 	type ${1:Name} struct {
