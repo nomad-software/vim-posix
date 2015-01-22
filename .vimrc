@@ -61,6 +61,7 @@
 
 	set wildmenu															"Switch on a more comprehensive autocomplete on the command line.
 	set wildmode=list:longest												"Add more options to the autocomplete list.
+	set completeopt=menu,menuone											"Show the autocomplete menu and even if there is only one match.
 
 	set laststatus=2														"Show the status line all the time.
 	set statusline=%{empty(expand('%:t'))?'new\ buffer':expand('%:t')}\ 
