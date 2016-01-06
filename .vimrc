@@ -270,7 +270,14 @@
 " Vim-GO
 "==========================================================================
 
-	let g:go_highlight_operators = 1
-	let g:go_highlight_functions = 1
+	let g:go_highlight_functions = 1										"Enable syntax hightlighting.
 	let g:go_highlight_methods = 1
 	let g:go_highlight_structs = 1
+	let g:go_highlight_operators = 1
+	let g:go_highlight_build_constraints = 1
+	let g:go_highlight_extra_types = 0
+	let g:go_highlight_string_spellcheck = 1
+	let g:go_fmt_command = "goimports"										"Automatically insert import paths instead of gofmt.
+	let g:go_fmt_autosave = 1												"Auto fmt on save.
+	let g:go_play_open_browser = 1											"Opening browser after posting your snippet to play.golang.org.
+	let g:go_auto_type_info = 0												"Display auto type information.
