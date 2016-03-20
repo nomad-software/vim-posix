@@ -37,6 +37,7 @@ function! go#cmd#Build(bang, ...)
     let default_makeprg = &makeprg
     let &makeprg = "go " . join(args, ' ')
 
+    let l:listtype = go#list#Type("quickfix")
     " execute make inside the source folder so we can parse the errors
     " correctly
     let cd = exists('*haslocaldir') && haslocaldir() ? 'lcd ' : 'cd '
@@ -46,20 +47,22 @@ function! go#cmd#Build(bang, ...)
         if g:go_dispatch_enabled && exists(':Make') == 2
             call go#util#EchoProgress("building dispatched ...")
             silent! exe 'Make'
-        else
+        elseif l:listtype == "locationlist"
             silent! exe 'lmake!'
+        else
+            silent! exe 'make!'
         endif
         redraw!
     finally
         execute cd . fnameescape(dir)
     endtry
 
-    let errors = go#list#Get()
-    call go#list#Window(len(errors))
+    let errors = go#list#Get(l:listtype)
+    call go#list#Window(l:listtype, len(errors))
 
     if !empty(errors)
         if !a:bang
-            call go#list#JumpToFirst()
+            call go#list#JumpToFirst(l:listtype)
         endif
     else
         call go#util#EchoSuccess("[build] SUCCESS")
@@ -71,8 +74,12 @@ endfunction
 
 
 " Run runs the current file (and their dependencies if any) in a new terminal.
-function! go#cmd#RunTerm(bang, mode)
-    let cmd = "go run ".  go#util#Shelljoin(go#tool#Files())
+function! go#cmd#RunTerm(bang, mode, files)
+    if empty(a:files)
+        let cmd = "go run ".  go#util#Shelljoin(go#tool#Files())
+    else
+        let cmd = "go run ".  go#util#Shelljoin(map(copy(a:files), "expand(v:val)"), 1)
+    endif
     call go#term#newmode(a:bang, cmd, a:mode)
 endfunction
 
@@ -82,7 +89,7 @@ endfunction
 " calling long running apps will block the whole UI.
 function! go#cmd#Run(bang, ...)
     if has('nvim')
-        call go#cmd#RunTerm(a:bang, '')
+        call go#cmd#RunTerm(a:bang, '', a:000)
         return
     endif
 
@@ -109,19 +116,23 @@ function! go#cmd#Run(bang, ...)
         let &makeprg = "go run " . go#util#Shelljoin(map(copy(a:000), "expand(v:val)"), 1)
     endif
 
+    let l:listtype = go#list#Type("quickfix")
+
     if g:go_dispatch_enabled && exists(':Make') == 2
         silent! exe 'Make'
-    else
+    elseif l:listtype == "locationlist"
         exe 'lmake!'
+    else
+        exe 'make!'
     endif
 
-    let items = go#list#Get()
+    let items = go#list#Get(l:listtype)
     let errors = go#tool#FilterValids(items)
 
-    call go#list#Populate(errors)
-    call go#list#Window(len(errors))
+    call go#list#Populate(l:listtype, errors)
+    call go#list#Window(l:listtype, len(errors))
     if !empty(errors) && !a:bang
-        call go#list#JumpToFirst()
+        call go#list#JumpToFirst(l:listtype)
     endif
 
     let $GOPATH = old_gopath
@@ -129,7 +140,7 @@ function! go#cmd#Run(bang, ...)
 endfunction
 
 " Install installs the package by simple calling 'go install'. If any argument
-" is given(which are passed directly to 'go instal') it tries to install those
+" is given(which are passed directly to 'go install') it tries to install those
 " packages. Errors are populated in the location window.
 function! go#cmd#Install(bang, ...)
     let default_makeprg = &makeprg
@@ -138,6 +149,7 @@ function! go#cmd#Install(bang, ...)
     let goargs = go#util#Shelljoin(map(copy(a:000), "expand(v:val)"), 1)
     let &makeprg = "go install " . goargs
 
+    let l:listtype = go#list#Type("quickfix")
     " execute make inside the source folder so we can parse the errors
     " correctly
     let cd = exists('*haslocaldir') && haslocaldir() ? 'lcd ' : 'cd '
@@ -147,19 +159,21 @@ function! go#cmd#Install(bang, ...)
         if g:go_dispatch_enabled && exists(':Make') == 2
             call go#util#EchoProgress("building dispatched ...")
             silent! exe 'Make'
-        else
+        elseif l:listtype == "locationlist"
             silent! exe 'lmake!'
+        else
+            silent! exe 'make!'
         endif
         redraw!
     finally
         execute cd . fnameescape(dir)
     endtry
 
-    let errors = go#list#Get()
-    call go#list#Window(len(errors))
+    let errors = go#list#Get(l:listtype)
+    call go#list#Window(l:listtype, len(errors))
     if !empty(errors)
         if !a:bang
-            call go#list#JumpToFirst()
+            call go#list#JumpToFirst(l:listtype)
         endif
     else
         redraws! | echon "vim-go: " | echohl Function | echon "installed to ". $GOPATH | echohl None
@@ -213,6 +227,8 @@ function! go#cmd#Test(bang, compile, ...)
 
     let out = go#tool#ExecuteInDir(command)
 
+    let l:listtype = "quickfix"
+
     if v:shell_error
         let cd = exists('*haslocaldir') && haslocaldir() ? 'lcd ' : 'cd '
         let dir = getcwd()
@@ -224,18 +240,18 @@ function! go#cmd#Test(bang, compile, ...)
             execute cd . fnameescape(dir)
         endtry
 
-        call go#list#Populate(errors)
-        call go#list#Window(len(errors))
+        call go#list#Populate(l:listtype, errors)
+        call go#list#Window(l:listtype, len(errors))
         if !empty(errors) && !a:bang
-            call go#list#JumpToFirst()
+            call go#list#JumpToFirst(l:listtype)
         elseif empty(errors)
             " failed to parse errors, output the original content
             call go#util#EchoError(out)
         endif
         echon "vim-go: " | echohl ErrorMsg | echon "[test] FAIL" | echohl None
     else
-        call go#list#Clean()
-        call go#list#Window()
+        call go#list#Clean(l:listtype)
+        call go#list#Window(l:listtype)
 
         if a:compile
             echon "vim-go: " | echohl Function | echon "[test] SUCCESS" | echohl None
@@ -281,19 +297,21 @@ function! go#cmd#Coverage(bang, ...)
 
     let command = "go test -coverprofile=" . l:tmpname . ' ' . go#util#Shelljoin(a:000)
 
+
+    let l:listtype = "quickfix"
     call go#cmd#autowrite()
     let out = go#tool#ExecuteInDir(command)
     if v:shell_error
         let errors = go#tool#ParseErrors(split(out, '\n'))
-        call go#list#Populate(errors)
-        call go#list#Window(len(errors))
+        call go#list#Populate(l:listtype, errors)
+        call go#list#Window(l:listtype, len(errors))
         if !empty(errors) && !a:bang
-            call go#list#JumpToFirst()
+            call go#list#JumpToFirst(l:listtype)
         endif
     else
         " clear previous location list 
-        call go#list#Clean()
-        call go#list#Window()
+        call go#list#Clean(l:listtype)
+        call go#list#Window(l:listtype)
 
         let openHTML = 'go tool cover -html='.l:tmpname
         call go#tool#ExecuteInDir(openHTML)
@@ -318,19 +336,23 @@ function! go#cmd#Generate(bang, ...)
         let &makeprg = "go generate " . goargs . ' ' . gofiles
     endif
 
+    let l:listtype = go#list#Type("quickfix")
+
     echon "vim-go: " | echohl Identifier | echon "generating ..."| echohl None
     if g:go_dispatch_enabled && exists(':Make') == 2
         silent! exe 'Make'
-    else
+    elseif l:listtype == "locationlist"
         silent! exe 'lmake!'
+    else
+        silent! exe 'make!'
     endif
     redraw!
 
-    let errors = go#list#Get()
-    call go#list#Window(len(errors))
+    let errors = go#list#Get(l:listtype)
+    call go#list#Window(l:listtype, len(errors))
     if !empty(errors) 
         if !a:bang
-            call go#list#JumpToFirst()
+            call go#list#JumpToFirst(l:listtype)
         endif
     else
         redraws! | echon "vim-go: " | echohl Function | echon "[generate] SUCCESS"| echohl None
