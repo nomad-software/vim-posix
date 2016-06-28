@@ -32,10 +32,10 @@ function! go#asmfmt#Format()
   if empty(path)
     return
   endif
-  let out = system(path . ' -w ' . l:tmpname)
+  let out = go#util#System(path . ' -w ' . l:tmpname)
 
   " If there's no error, replace the current file with the output.
-  if v:shell_error == 0
+  if go#util#ShellError() == 0
     " Remove undo point caused by BufWritePre.
     try | silent undojoin | catch | endtry
 
@@ -50,3 +50,5 @@ function! go#asmfmt#Format()
   " Restore the cursor/window positions.
   call winrestview(l:curw)
 endfunction
+
+" vim: sw=2 ts=2 et
