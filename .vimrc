@@ -11,8 +11,6 @@
 	  set mouse=a															"Use the mouse if available.
 	endif
 
-	let s:uname = system('echo -n $(uname)')								"Detect the platform.
-
 "==========================================================================
 " EDITOR PREFERENCES
 "==========================================================================
@@ -76,9 +74,9 @@
 
 	if has('gui_running')
 
-		if s:uname == 'Linux'
+		if has('unix')
 			set guifont=DeJaVu\ Sans\ Mono\ 11								"Set the editor font.
-		elseif s:uname == 'Darwin'
+		elseif has('mac')
 			set guifont=DeJaVu_Sans_Mono:h12								"Set the editor font.
 		endif
 
@@ -105,7 +103,7 @@
 " KEYBOARD MAPPINGS
 "==========================================================================
 
-	if s:uname == 'Darwin'
+	if has('mac')
 		let g:mapleader = "`"												"Set the leader to account for mac os keyboards.
 	endif
 
@@ -152,10 +150,10 @@
 " CTAGS
 "==========================================================================
 
-	if s:uname == 'Linux'
+	if has('unix')
 		let g:Tlist_Ctags_Cmd="ctags"										"Set the ctags command.
-	elseif s:uname == 'Darwin'
-		let g:Tlist_Ctags_Cmd="ctags-exuberant"								"Set the ctags command. (Custom named to avoid conflict with gnu ctags.)
+	elseif has('mac')
+		let g:Tlist_Ctags_Cmd="universal-ctags"								"Set the ctags command. (Custom named to avoid conflict with gnu ctags.)
 	endif
 
 	let g:Tlist_Auto_Highlight_Tag=0										"Switch off tag highlighting.
@@ -187,21 +185,17 @@
 " CTRL-P
 "==========================================================================
 
-	if s:uname == 'Linux'													"Specify the main CtrlP command.
-		let g:ctrlp_cmd = 'CtrlP /media/Data/Projects/'
-	elseif s:uname == 'Darwin'
-		let g:ctrlp_cmd = 'CtrlP /Users/gary/Projects/'
+	if has('unix')
+		let g:ctrlp_cmd = 'CtrlP /media/Data/Projects/'						"Specify the main CtrlP projects directory.
+		let g:ctrlp_user_command = 'find %s -type f | grep -i -v -P '		"use a custom search and filter.
+	elseif has('mac')
+		let g:ctrlp_cmd = 'CtrlP /Users/gary/Projects/'						"Specify the main CtrlP projects directory.
+		let g:ctrlp_user_command = 'find %s -type f | egrep -i -v '			"use a custom search and filter.
 	endif
 
 	let g:ctrlp_max_height = 30												"The main window height.
 	let g:ctrlp_by_filename = 1												"Search by file name only.
 	let g:ctrlp_open_multiple_files = 'i'									"Open multiple files in hidden buffers.
-
-	if s:uname == 'Linux'													"use a custom search and filter.
-		let g:ctrlp_user_command = 'find %s -type f | grep -i -v -P '
-	elseif s:uname == 'Darwin'
-		let g:ctrlp_user_command = 'find %s -type f | egrep -i -v '
-	endif
 
 	let g:ctrlp_user_command .= '"\.dll$|\.o$|\.obj$|\.exe$|'
 	let g:ctrlp_user_command .= '\.pyc$|\.jpg$|\.gif$|\.png$|'

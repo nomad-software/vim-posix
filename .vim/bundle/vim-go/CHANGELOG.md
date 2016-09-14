@@ -1,10 +1,68 @@
-## 1.8 (unplanned)
+## Unplanned
+
+BUG FIXES:
+
+* Change back nil and iota highlighting color to the old type [gh-1049]
+
+## 1.9 (September 13, 2016)
 
 IMPROVEMENTS:
 
+* **guru** uses now the `-modified` flag, which allows us use guru on modified
+  buffers as well. This affects all commands where `guru` is used. Such as
+  `:GoDef`, `:GoReferrers`, etc.. [gh-944]
+* **:GoDoc** uses now the `-modified` flag under the hood (for `gogetdoc), which allows us to get documentation for the identifier under the cursor ina modified buffer. [gh-1014]
+* Cleanup and improve documentation [gh-987]
+* Add new `g:go_gocode_socket_type` setting to change the underlying socket type passed to `gocode`. Usefull to fallback to `tcp` on cases such as Bash on Windows [gh-1000]
+* `:GoSameIds` is now automatically re-evaluated in cases of buffer reloads (such as `:GoRename`) [gh-998]
+* Improve docs about `go_auto_sameids` [gh-1017]
+* Improve error message by printing the full path if an incompatible `goimports` is being used [gh-1006]
+* `iota` and `nil` are now highlighted correctly and are not treated as booleans [gh-1030]
+
+BUG FIXES:
+
+* Fix system calls on Windows [gh-988]
+* Fix :GoSameIds and :GoCoverage for light background and after changing color schemes [gh-983]
+* Fix TagBar and `GoCallers` for Windows user [gh-999]
+* Set updatetime for for `auto_sameids` feature as well [gh-1016]
+* Update docs about missing `go_highlight_generate_tags` setting [gh-1023]
+* Fix updating the jumplist if `:GoDef` is used [gh-1029]
+* Fix highlighting literal percent sign (`%%`) in strings [gh-1011]
+* Fix highlighting of nested fields [gh-1007]
+* Fix checking for `exepath` feature for the upcoming vim 8.0 release [gh-1046]
+
+BACKWARDS INCOMPATIBILITIES:
+
+* Rename `GoMetalinterAutoSaveToggle` to `GoMetaLinterAutoSaveToggle` to make it compatible with the existing `:GoMetaLinter` command [gh-1020]
+
+## 1.8 (July 31, 2016)
+
+FEATURES:
+* New **`:GoAddTags`** command that adds field tags for the fields of a struct automatically based on the field names. Checkout the demo to see it in action: https://twitter.com/fatih/status/759822857773907968 [gh-971]
+* The snippet expansion `json` is now much more smarter. It pre populates the placeholder according to the first word and it also applies `snake_case` or `camelCase` conversion. Together with `:GoAddTags` it gives `vim-go` users flexible ways of populating a field tag. Checkout the demo to see it in action: https://twitter.com/fatih/status/754477622042689536 [gh-927]
+* New **`:GoSameIds`** command. When called highlights all same identifiers in the current file. Can be also enabled to highlight identifiers automatically (with `:GoSameIdsAutoToggle` or `g:go_auto_sameids`). Checkout the demo to see it in action: https://twitter.com/fatih/status/753673709278339072. [gh-936]
+* New **`:GoWhicherrs`** command. It shows all possible values of the selected error variable. [gh-948]
+* Add new `errp` snippet to expand an `if err != nil { panic() }` clause [gh-926] 
+* If you open a new buffer with a Go filename it get automatically populated based on the directory. If there are no Go files a simple main package is created, otherwise the file will include the package declaration line based on the package in the current directory. Checkout the demo to see it in action: https://twitter.com/fatih/status/748333086643994624. This is enabled by default. Can be disabled with `let g:go_template_autocreate = 0`. You can use your own template with `let g:go_template_file = "foo.go"` and putting the file under the `templates/` folder. [gh-918]
+* Added new toggle commands to enable/disable feature that run for your
+  automatic. For example if you have `let g:go_auto_type_info = 1` enabled, you
+  can now easily enable/disable it on the fly. Support added with the following
+  commands: `:GoAutoTypeInfoToggle`, `:GoFmtAutoSaveToggle`,
+  `:GoAsmFmtAutoSaveToggle`, `:GoMetalinterAutoSaveToggle`,
+  `:GoTemplateAutoCreateToggle` [gh-945]
+
+
+IMPROVEMENTS:
 * `:GoDoc` accepts arguments now which are passed directly to `godoc`. So usages like `:GoDoc flag` works again (it was changed in previous versions [gh-894]
 * `:GoDef` works now for modified files as well [gh-910]
+* Internal: pass filename to the `--srcdir` flag to enable upcoming `goimports` features [gh-957]
 * Internal: fix indentations on all files to **2-spaces/no tabs**. This is now the default vim-go style across all VimL files [gh-915]
+* Internal: autocmd settings can be now dynamically enabled/disabled [gh-939]
+* Internal: automatically detect `GOPATH`  for :GoInstall [gh-980]
+* Internal: shell executions uses now by default `sh` and then resets it back to the user preference. [gh-967]
+* Syntax: improved syntax highglighting performance for methods, fields, structs and interface type declarations [gh-917]
+* Syntax: moved `:GoCoverage` highlight definition into go's syntax file for more customizability [gh-962]
+
 
 BUG FIXES:
 
@@ -13,6 +71,13 @@ BUG FIXES:
 * Fix `:GoCoverage` not running for Neovim [gh-899]
 * Fix `:GoFmt` not picking up `-srcdir` if the command was set to use `goimports` [gh-904]
 * Fix `:GoTestCompile` to not leave behind artifacts if the cwd and the test files's directory do not match [gh-909]
+* Fix `:GoDocBrowser` to not fail if godoc doesn't exist [gh-920]
+* Fix `:GoFmt` to not change the permissions of saved file. Now original file permissions are restored [gh-922]
+
+BACKWARDS INCOMPATIBILITIES:
+
+* `g:go_highlight_structs` and `g:go_highlight_interface` are removed in favor of `g:go_highlight_types` [gh-917]
+
 
 ## 1.7.1 (June 7, 2016)
 

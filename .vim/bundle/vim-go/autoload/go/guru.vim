@@ -7,7 +7,6 @@ func! s:RunGuru(mode, format, selected, needs_scope) range abort
     return {'err': "bin path not found"}
   endif
 
-  let filename = expand('%:p')
   let dirname = expand('%:p:h')
   let pkg = go#package#ImportPath(dirname)
 
@@ -18,6 +17,15 @@ func! s:RunGuru(mode, format, selected, needs_scope) range abort
 
   " start constructing the 'command' variable
   let command = bin_path
+
+  let filename = fnamemodify(expand("%"), ':p:gs?\\?/?')
+  let in = ""
+  if &modified
+    let sep = go#util#LineEnding()
+    let content  = join(getline(1, '$'), sep )
+    let in = filename . "\n" . strlen(content) . "\n" . content
+    let command .= " -modified"
+  endif
 
   " enable outputting in json format
   if a:format == "json"
@@ -61,8 +69,8 @@ func! s:RunGuru(mode, format, selected, needs_scope) range abort
     let scopes = go#util#Shelllist(scopes)
 
     " guru expect a comma-separated list of patterns, construct it
-    let scope = join(scopes, ",")
-    let command .= printf(" -scope %s", scope)
+    let l:scope = join(scopes, ",")
+    let command .= printf(" -scope %s", l:scope)
   endif
 
   let pos = printf("#%s", go#util#OffsetCursor())
@@ -80,11 +88,19 @@ func! s:RunGuru(mode, format, selected, needs_scope) range abort
   let old_gopath = $GOPATH
   let $GOPATH = go#path#Detect()
 
-  " the query might take time, let us give some feedback
-  call go#util#EchoProgress("analysing ...")
+  if a:needs_scope
+    call go#util#EchoProgress("analysing with scope ". l:scope . " ...")
+  elseif a:mode !=# 'what'
+    " the query might take time, let us give some feedback
+    call go#util#EchoProgress("analysing ...")
+  endif
 
   " run, forrest run!!!
-  let out = go#util#System(command)
+  if &modified
+    let out = go#util#System(command, in)
+  else
+    let out = go#util#System(command)
+  endif
 
   let $GOPATH = old_gopath
   if go#util#ShellError() != 0
@@ -157,6 +173,23 @@ function! go#guru#Tags(...)
   else
     call go#util#EchoSuccess("current guru tags: ". a:1)
   endif
+endfunction
+
+" Report the possible constants, global variables, and concrete types that may
+" appear in a value of type error
+function! go#guru#Whicherrs(selected)
+  let out = s:RunGuru('whicherrs', 'plain', a:selected, 1)
+  if has_key(out, 'err')
+    call go#util#EchoError(out.err)
+    return
+  endif
+
+  if empty(out.out)
+    call go#util#EchoSuccess("no error variables found. Try to change the scope with :GoGuruScope")
+    return
+  endif
+
+  call s:loclistSecond(out.out)
 endfunction
 
 " Show 'implements' relation for selected package
@@ -254,51 +287,110 @@ function! go#guru#Referrers(selected)
 endfunction
 
 function! go#guru#What(selected)
-  " nvim doesn't have JSON support, though they work on it:
-  " https://github.com/neovim/neovim/pull/4131
-  if has('nvim')
-    return {'err': "GoWhat is not supported in Neovim"}
-  endif
-
-  " json_encode() and friends are introduced with this patch
-  " https://groups.google.com/d/msg/vim_dev/vLupTNhQhZ8/cDGIk0JEDgAJ
-  if !has('patch-7.4.1304')
-    return {'err': "GoWhat is supported with Vim version 7.4-1304 or later"}
+  " json_encode() and friends are introduced with this patch (7.4.1304)
+  " vim: https://groups.google.com/d/msg/vim_dev/vLupTNhQhZ8/cDGIk0JEDgAJ
+  " nvim: https://github.com/neovim/neovim/pull/4131        
+  if !exists("*json_decode")
+    return {'err': "GoWhat is not supported due old version of Vim/Neovim"}
   endif
 
   let out = s:RunGuru('what', 'json', a:selected, 0)
   if has_key(out, 'err')
-    return out.err
+    return {'err': out.err}
   endif
 
-  call s:loclistSecond(out.out)
   let result = json_decode(out.out)
 
   if type(result) != type({})
     return {'err': "malformed output from guru"}
   endif
 
-  if !has_key(result, 'what')
-    return {'err': "no what query found for the given identifier"}
-  endif
-
-  return {'out': result.what}
+  return result
 endfunction
 
-function! go#guru#SameIds(selected)
-  let result = go#guru#What(a:selected)
-  if has_key(out, 'err')
-    call go#util#EchoError(out.err)
+function! go#guru#AutoToogleSameIds()
+  if get(g:, "go_auto_sameids", 0)
+    call go#util#EchoProgress("sameids auto highlighting disabled")
+    call go#guru#ClearSameIds()
+    let g:go_auto_sameids = 0
     return
   endif
 
-  if !has_key(result.out, 'sameids')
-    call go#util#EchoError("no same_ids founds for the given identifier")
-    return -1
+  call go#util#EchoSuccess("sameids auto highlighting enabled")
+  let g:go_auto_sameids = 1
+endfunction
+
+function! go#guru#SameIds(selected)
+  " we use matchaddpos() which was introduce with 7.4.330, be sure we have
+  " it: http://ftp.vim.org/vim/patches/7.4/7.4.330
+  if !exists("*matchaddpos")
+    call go#util#EchoError("GoSameIds is supported with Vim version 7.4-330 or later")
+    return
   endif
 
-  let same_ids = result.what.sameids
-  echo same_ids
+  let result = go#guru#What(a:selected)
+
+  call go#guru#ClearSameIds() " run after calling guru to reduce flicker.
+  if has_key(result, 'err') && !get(g:, 'go_auto_sameids', 0)
+    " only echo if it's called via `:GoSameIds, but not if it's in automode
+    call go#util#EchoError(result.err)
+    return
+  endif
+
+  if !has_key(result, 'sameids')
+    if !get(g:, 'go_auto_sameids', 0)
+      call go#util#EchoError("no same_ids founds for the given identifier")
+    endif
+    return
+  endif
+
+  let poslen = 0
+  for enclosing in result['enclosing']
+    if enclosing['desc'] == 'identifier'
+      let poslen = enclosing['end'] - enclosing['start']
+      break
+    endif
+  endfor
+
+  " return when there's no identifier to highlight.
+  if poslen == 0
+    return
+  endif
+
+  let same_ids = result['sameids']
+  " highlight the lines
+  for item in same_ids
+    let pos = split(item, ':')
+    call matchaddpos('goSameId', [[str2nr(pos[-2]), str2nr(pos[-1]), str2nr(poslen)]])
+  endfor
+
+  if get(g:, "go_auto_sameids", 0)
+    " re-apply SameIds at the current cursor position at the time the buffer
+    " is redisplayed: e.g. :edit, :GoRename, etc.
+    autocmd BufWinEnter <buffer> nested call go#guru#SameIds(-1)
+  endif
+endfunction
+
+function! go#guru#ClearSameIds()
+  let m = getmatches()
+  for item in m
+    if item['group'] == 'goSameId'
+      call matchdelete(item['id'])
+    endif
+  endfor
+
+  " remove the autocmds we defined
+  if exists("#BufWinEnter<buffer>")
+    autocmd! BufWinEnter <buffer>
+  endif
+endfunction
+
+function! go#guru#ToggleSameIds(selected)
+  if len(getmatches()) != 0 
+    call go#guru#ClearSameIds()
+  else
+    call go#guru#SameIds(a:selected)
+  endif
 endfunction
 
 " vim: sw=2 ts=2 et
