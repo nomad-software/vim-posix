@@ -23,7 +23,7 @@ hi Folded                          guibg=bg      guifg=#595959 gui=none
 hi LineNr                          guibg=#1F1F1F guifg=#595959 gui=none
 hi VertSplit                       guibg=#333333 guifg=#595959 gui=none
 hi ErrorMsg                        guibg=bg      guifg=#F07070 gui=none
-hi MatchParen                      guibg=#111111 guifg=#FFFF00 gui=none
+hi MatchParen                      guibg=#202020 guifg=#FFFF00 gui=none
 hi StatusLine                      guibg=#333333 guifg=#999999 gui=none
 hi StatusLineNC                    guibg=#333333 guifg=#777777 gui=none
 hi Title                           guifg=#F7F7F1               gui=none
