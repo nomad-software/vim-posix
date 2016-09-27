@@ -1,6 +1,6 @@
 " Vim colorscheme
 " Author:  Gary Willoughby (originally by Georg Dahn)
-" Version: 2.3
+" Version: 2.4
 " Date:    24th October 2012
 
 set background=dark
