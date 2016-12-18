@@ -62,7 +62,8 @@
 	set completeopt=menu,menuone											"Show the autocomplete menu and even if there is only one match.
 
 	set laststatus=2														"Show the status line all the time.
-	set statusline=%{empty(expand('%:t'))?'new\ buffer':expand('%:t')}\ 
+	set statusline=%#StatusLineNC#%{expand('%:p:h')}\ \|\ %*
+	set statusline+=%{empty(expand('%:t'))?'new\ buffer':expand('%:p:t')}\ 
 	set statusline+=%#User1#%m%*
 	set statusline+=%#User0#%r%*
 	set statusline+=%=
