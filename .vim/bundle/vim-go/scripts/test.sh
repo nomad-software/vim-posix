@@ -1,4 +1,5 @@
 #!/bin/bash
+# vim:ts=2:sts=2:sw=2:et
 
 set -e
 
@@ -10,20 +11,20 @@ go get golang.org/x/tools/cmd/goimports
 
 # cleanup test.log
 if [ -f "test.log" ]; then
-   rm test.log
+  rm test.log
 fi
 
 if [ -f "FAILED" ]; then
-   rm FAILED
+  rm FAILED
 fi
 
 for test_file in ../autoload/go/*_test.vim
 do
-	vim -u NONE -S runtest.vim $test_file
+  vim -u NONE -S runtest.vim $test_file
 done
 
 if [ -f "test.log" ]; then
-   cat test.log
+  cat test.log
 fi
 
 # if Failed exists, test failed
@@ -32,3 +33,15 @@ if [ -f "FAILED" ]; then
   exit 1
 fi
 echo 2>&1 "PASS"
+
+# Run vimhelplint
+[ -d vim-vimhelplint ] || git clone https://github.com/machakann/vim-vimhelplint
+echo "Running vimhelplint"
+lint=$(vim -esN --cmd 'set rtp+=./vim-vimhelplint' -c 'filetype plugin on' \
+       -c 'e ../doc/vim-go.txt' -c 'verb VimhelpLintEcho' -c q 2>&1)
+if [ -n "$lint" ]; then 
+  echo $lint
+  exit 1
+else
+  exit 0
+fi
