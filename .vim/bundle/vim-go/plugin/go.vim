@@ -4,6 +4,29 @@ if exists("g:go_loaded_install")
 endif
 let g:go_loaded_install = 1
 
+" Not using the has('patch-7.4.1689') syntax because that wasn't added until
+" 7.4.237, and we want to be sure this works for everyone (this is also why
+" we're not using utils#EchoError()).
+"
+" Version 7.4.1689 was chosen because that's what the most recent Ubuntu LTS
+" release (16.04) uses.
+if
+      \ get(g:, 'go_version_warning', 1) != 0 &&
+      \ (v:version < 704 || (v:version == 704 && !has('patch1689')))
+      \ && !has('nvim')
+  echohl Error
+  echom "vim-go requires Vim 7.4.1689 or Neovim, but you're using an older version."
+  echom "Please update your Vim for the best vim-go experience."
+  echom "If you really want to continue you can set this to make the error go away:"
+  echom "    let g:go_version_warning = 0"
+  echom "Note that some features may error out or behave incorrectly."
+  echom "Please do not report bugs unless you're using Vim 7.4.1689 or newer."
+  echohl None
+
+  " Make sure people see this.
+  sleep 2
+endif
+
 " these packages are used by vim-go and can be automatically installed if
 " needed by the user with GoInstallBinaries
 let s:packages = {
@@ -34,10 +57,11 @@ fun! s:complete(lead, cmdline, cursor)
   return filter(keys(s:packages), 'strpart(v:val, 0, len(a:lead)) == a:lead')
 endfun
 
-" GoInstallBinaries downloads and install all necessary binaries stated in the
-" packages variable. It uses by default $GOBIN or $GOPATH/bin as the binary
-" target install directory. GoInstallBinaries doesn't install binaries if they
-" exist, to update current binaries pass 1 to the argument.
+" GoInstallBinaries downloads and installs binaries defined in s:packages to
+" $GOBIN or $GOPATH/bin. GoInstallBinaries will update already installed
+" binaries only if updateBinaries = 1. By default, all packages in s:packages
+" will be installed, but the set can be limited by passing the desired
+" packages in the unnamed arguments.
 function! s:GoInstallBinaries(updateBinaries, ...)
   let err = s:CheckBinaries()
   if err != 0
@@ -122,7 +146,7 @@ function! s:GoInstallBinaries(updateBinaries, ...)
         echo "vim-go: ". binary ." not found. Installing ". importPath . " to folder " . go_bin_path
       endif
 
-      let out = go#util#System(cmd . l:goGetFlags . shellescape(importPath))
+      let out = go#util#System(printf('%s %s %s', cmd, l:goGetFlags, shellescape(importPath)))
       if go#util#ShellError() != 0
         echom "Error installing " . importPath . ": " . out
       endif
@@ -236,6 +260,19 @@ augroup vim-go
   " in the same window doesn't highlight the most recently matched
   " identifier's positions.
   autocmd BufWinEnter *.go call go#guru#ClearSameIds()
-augroup END
+
+  autocmd BufEnter *.go
+        \  if get(g:, 'go_autodetect_gopath', 0) && !exists('b:old_gopath')
+        \|   let b:old_gopath = exists('$GOPATH') ? $GOPATH : -1
+        \|   let $GOPATH = go#path#Detect()
+        \| endif
+  autocmd BufLeave *.go
+        \  if exists('b:old_gopath')
+        \|   if b:old_gopath isnot -1
+        \|     let $GOPATH = b:old_gopath
+        \|   endif
+        \|   unlet b:old_gopath
+        \| endif
+augroup end
 
 " vim: sw=2 ts=2 et

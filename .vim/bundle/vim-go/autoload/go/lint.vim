@@ -48,6 +48,13 @@ function! go#lint#Gometa(autosave, ...) abort
       let cmd += ["--exclude=".exclude]
     endfor
 
+    " gometalinter has a --tests flag to tell its linters whether to run
+    " against tests. While not all of its linters respect this flag, for those
+    " that do, it means if we don't pass --tests, the linter won't run against
+    " test files. One example of a linter that will not run against tests if
+    " we do not specify this flag is errcheck.
+    let cmd += ["--tests"]
+
     " path
     let cmd += [expand('%:p:h')]
   else
@@ -252,12 +259,15 @@ function s:lint_job(args)
   function! s:callback(chan, msg) closure
     let old_errorformat = &errorformat
     let &errorformat = l:errformat
-    if l:listtype == "locationlist"
-      lad a:msg
-    elseif l:listtype == "quickfix"
-      caddexpr a:msg
-    endif
-    let &errorformat = old_errorformat
+    try
+      if l:listtype == "locationlist"
+        lad a:msg
+      elseif l:listtype == "quickfix"
+        caddexpr a:msg
+      endif
+    finally
+      let &errorformat = old_errorformat
+    endtry
 
     " TODO(jinleileiking): give a configure to jump or not
     let l:winnr = winnr()

@@ -1,5 +1,5 @@
 " -- gorename
-command! -nargs=? GoRename call go#rename#Rename(<bang>0,<f-args>)
+command! -nargs=? -complete=customlist,go#rename#Complete GoRename call go#rename#Rename(<bang>0, <f-args>)
 
 " -- guru
 command! -nargs=* -complete=customlist,go#package#Complete GoGuruScope call go#guru#Scope(<f-args>)
@@ -87,7 +87,7 @@ command! -nargs=? -complete=file GoDecls call go#decls#Decls(0, <q-args>)
 command! -nargs=? -complete=dir GoDeclsDir call go#decls#Decls(1, <q-args>)
 
 " -- impl
-command! -nargs=* -buffer -complete=customlist,go#impl#Complete GoImpl call go#impl#Impl(<f-args>)
+command! -nargs=* -complete=customlist,go#impl#Complete GoImpl call go#impl#Impl(<f-args>)
 
 " -- template
 command! -nargs=0 GoTemplateAutoCreateToggle call go#template#ToggleAutoCreate()

@@ -7,9 +7,9 @@ if !exists("g:go_list_type_commands")
 endif
 
 " Window opens the list with the given height up to 10 lines maximum.
-" Otherwise g:go_loclist_height is used. 
+" Otherwise g:go_loclist_height is used.
 "
-" If no or zero height is given it closes the window by default.  
+" If no or zero height is given it closes the window by default.
 " To prevent this, set g:go_list_autoclose = 0
 function! go#list#Window(listtype, ...) abort
   " we don't use lwindow to close the location list as we need also the
@@ -78,16 +78,18 @@ function! go#list#ParseFormat(listtype, errformat, items, title) abort
 
   " parse and populate the location list
   let &errorformat = a:errformat
-  if a:listtype == "locationlist"
-    lgetexpr a:items
-    if has("patch-7.4.2200") | call setloclist(0, [], 'a', {'title': a:title}) | endif
-  else
-    cgetexpr a:items
-    if has("patch-7.4.2200") | call setqflist([], 'a', {'title': a:title}) | endif
-  endif
-
-  "restore back
-  let &errorformat = old_errorformat
+  try
+    if a:listtype == "locationlist"
+      lgetexpr a:items
+      if has("patch-7.4.2200") | call setloclist(0, [], 'a', {'title': a:title}) | endif
+    else
+      cgetexpr a:items
+      if has("patch-7.4.2200") | call setqflist([], 'a', {'title': a:title}) | endif
+    endif
+  finally
+    "restore back
+    let &errorformat = old_errorformat
+  endtry
 endfunction
 
 " Parse parses the given items based on the global errorformat and
