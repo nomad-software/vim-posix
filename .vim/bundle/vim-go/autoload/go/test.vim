@@ -94,7 +94,6 @@ function! go#test#Test(bang, compile, ...) abort
     call go#util#EchoError("[test] FAIL")
   else
     call go#list#Clean(l:listtype)
-    call go#list#Window(l:listtype)
 
     if a:compile
       call go#util#EchoSuccess("[test] SUCCESS")
@@ -129,15 +128,16 @@ function! go#test#Func(bang, ...) abort
 
   if a:0
     call extend(args, a:000)
+  else
+    " only add this if no custom flags are passed
+    let timeout  = get(g:, 'go_test_timeout', '10s')
+    call add(args, printf("-timeout=%s", timeout))
   endif
 
   call call('go#test#Test', args)
 endfunction
 
 function! s:test_job(args) abort
-  let status_dir = expand('%:p:h')
-  let started_at = reltime()
-
   let status = {
         \ 'desc': 'current status',
         \ 'type': "test",
@@ -148,24 +148,37 @@ function! s:test_job(args) abort
     let status.state = "compiling"
   endif
 
-  call go#statusline#Update(status_dir, status)
-
   " autowrite is not enabled for jobs
   call go#cmd#autowrite()
 
-  let messages = []
-  function! s:callback(chan, msg) closure
-    call add(messages, a:msg)
+  let state = {
+        \ 'exited': 0,
+        \ 'closed': 0,
+        \ 'exitval': 0,
+        \ 'messages': [],
+        \ 'args': a:args,
+        \ 'compile_test': a:args.compile_test,
+        \ 'status_dir': expand('%:p:h'),
+        \ 'started_at': reltime()
+      \ }
+
+  call go#statusline#Update(state.status_dir, status)
+
+  function! s:callback(chan, msg) dict
+    call add(self.messages, a:msg)
   endfunction
 
-  function! s:exit_cb(job, exitval) closure
+  function! s:exit_cb(job, exitval) dict
+    let self.exited = 1
+    let self.exitval = a:exitval
+
     let status = {
           \ 'desc': 'last status',
           \ 'type': "test",
           \ 'state': "pass",
           \ }
 
-    if a:args.compile_test
+    if self.compile_test
       let status.state = "success"
     endif
 
@@ -175,7 +188,7 @@ function! s:test_job(args) abort
 
     if get(g:, 'go_echo_command_info', 1)
       if a:exitval == 0
-        if a:args.compile_test
+        if self.compile_test
           call go#util#EchoSuccess("[test] SUCCESS")
         else
           call go#util#EchoSuccess("[test] PASS")
@@ -185,29 +198,33 @@ function! s:test_job(args) abort
       endif
     endif
 
-    let elapsed_time = reltimestr(reltime(started_at))
+    let elapsed_time = reltimestr(reltime(self.started_at))
     " strip whitespace
     let elapsed_time = substitute(elapsed_time, '^\s*\(.\{-}\)\s*$', '\1', '')
     let status.state .= printf(" (%ss)", elapsed_time)
 
-    call go#statusline#Update(status_dir, status)
+    call go#statusline#Update(self.status_dir, status)
 
-    let l:listtype = go#list#Type("GoTest")
-    if a:exitval == 0
-      call go#list#Clean(l:listtype)
-      call go#list#Window(l:listtype)
-      return
+    if self.closed
+      call s:show_errors(self.args, self.exitval, self.messages)
     endif
-
-  " TODO(bc): When messages is JSON, the JSON should be run through a
-  " filter to produce lines that are more easily described by errorformat.
-    call s:show_errors(a:args, a:exitval, messages)
   endfunction
 
+  function! s:close_cb(ch) dict
+    let self.closed = 1
+
+    if self.exited
+      call s:show_errors(self.args, self.exitval, self.messages)
+    endif
+  endfunction
+
+  " explicitly bind the callbacks to state so that self within them always
+  " refers to state. See :help Partial for more information.
   let start_options = {
-        \ 'callback': funcref("s:callback"),
-        \ 'exit_cb': funcref("s:exit_cb"),
-        \ }
+        \ 'callback': funcref("s:callback", [], state),
+        \ 'exit_cb': funcref("s:exit_cb", [], state),
+        \ 'close_cb': funcref("s:close_cb", [], state)
+      \ }
 
   " pre start
   let dir = getcwd()
@@ -225,6 +242,15 @@ endfunction
 " a quickfix compatible list of errors. It's intended to be used only for go
 " test output.
 function! s:show_errors(args, exit_val, messages) abort
+    let l:listtype = go#list#Type("GoTest")
+    if a:exit_val == 0
+      call go#list#Clean(l:listtype)
+      return
+    endif
+
+  " TODO(bc): When messages is JSON, the JSON should be run through a
+  " filter to produce lines that are more easily described by errorformat.
+
   let l:listtype = go#list#Type("GoTest")
 
   let cd = exists('*haslocaldir') && haslocaldir() ? 'lcd ' : 'cd '
@@ -253,6 +279,7 @@ endfunction
 
 
 let s:efm= ""
+let s:go_test_show_name=0
 
 function! s:errorformat() abort
   " NOTE(arslan): once we get JSON output everything will be easier :).
@@ -261,14 +288,16 @@ function! s:errorformat() abort
   "   https://github.com/golang/go/issues/2981.
   let goroot = go#util#goroot()
 
-  if s:efm != ""
+  let show_name=get(g:, 'go_test_show_name', 0)
+  if s:efm != "" && s:go_test_show_name == show_name
     return s:efm
   endif
+  let s:go_test_show_name = show_name
 
-  " each level of test indents the test output 4 spaces.
-  " TODO(bc): figure out how to use 0 or more groups of four spaces for the
-  " indentation. '%\\(    %\\)%#' should work, but doesn't.
-  let indent = " %#"
+  " each level of test indents the test output 4 spaces. Capturing groups
+  " (e.g. \(\)) cannot be used in an errorformat, but non-capturing groups can
+  " (e.g. \%(\)).
+  let indent = '%\\%(    %\\)%#'
 
   " match compiler errors
   let format = "%f:%l:%c: %m"
@@ -285,8 +314,8 @@ function! s:errorformat() abort
   "
   " e.g.:
   "   '--- FAIL: TestSomething (0.00s)'
-  if get(g:, 'go_test_show_name', 0)
-    let format .= ",%+G" . indent . "--- FAIL: %.%#"
+  if show_name
+    let format .= ",%G" . indent . "--- FAIL: %m (%.%#)"
   else
     let format .= ",%-G" . indent . "--- FAIL: %.%#"
   endif
@@ -298,6 +327,12 @@ function! s:errorformat() abort
   " message. e.g.:
   "   '\ttime_test.go:30: Likely problem: the time zone files have not been installed.'
   let format .= ",%A" . indent . "%\\t%\\+%f:%l: %m"
+  " also match lines that don't have a message (i.e. the message begins with a
+  " newline or is the empty string):
+  " e.g.:
+  "     t.Errorf("\ngot %v; want %v", actual, expected)
+  "     t.Error("")
+  let format .= ",%A" . indent . "%\\t%\\+%f:%l: "
 
   " Match the 2nd and later lines of multi-line output. These lines are
   " indented the number of spaces for the level of nesting of the test,
@@ -314,6 +349,10 @@ function! s:errorformat() abort
 
   " set the format for panics.
 
+  " handle panics from test timeouts
+  let format .= ",%+Gpanic: test timed out after %.%\\+"
+
+  " handle non-timeout panics
   " In addition to 'panic', check for 'fatal error' to support older versions
   " of Go that used 'fatal error'.
   "
