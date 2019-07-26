@@ -76,7 +76,7 @@
 	if has('gui_running')
 
 		if has('unix')
-			set guifont=DeJaVu\ Sans\ Mono\ 11								"Set the editor font.
+			set guifont=Pragmata\ Pro\ Mono\ 12								"Set the editor font.
 		elseif has('mac')
 			set guifont=DeJaVu_Sans_Mono:h12								"Set the editor font.
 		endif
@@ -86,7 +86,8 @@
 		set cursorline														"Highlight current line.
 
 		set lines=65														"Set the initial height of the editor.
-		set columns=177														"Set the initial width of the editor.
+		set columns=199														"Set the initial width of the editor.
+		set linespace=2														"Increase linespace by a few pixels.
 
 		set noerrorbells													"Don't make noise.
 		set novisualbell													"Don't blink.
@@ -142,7 +143,7 @@
 "==========================================================================
 
 	" Fold D source unit tests.
-	autocmd BufRead *.d silent! g/^unittest\>/normal! Vj%zfgg
+	autocmd BufRead *.d silent! g/^.*unittest\>/normal! Vj%zfgg
 
 	" Disable the bell.
 	autocmd! GUIEnter * set vb t_vb=										"Don't make noise on MacOS.
@@ -208,8 +209,7 @@
 	let g:ctrlp_user_command .= '\.doc$|\.lib$|\.wav$|\.qxd$|'
 	let g:ctrlp_user_command .= '\.woff$|\.class$|\.jar$|\.ai$|'
 	let g:ctrlp_user_command .= '\.ogg$|\.blend[\d]*$|\.ms3d$|'
-	let g:ctrlp_user_command .= '\.url$|\.mod$|\.ds_store$|\.a$|'
-	let g:ctrlp_user_command .= '\.so$"'
+	let g:ctrlp_user_command .= '\.url$|\.ds_store$|\.a$|\.so$"'
 
 	let g:ctrlp_mruf_max = 1000												"The number of recently used files to remember.
 	let g:ctrlp_mruf_exclude = '/tmp/.*'									"Don't remember files that match this regex.
@@ -220,7 +220,7 @@
 " NERDTREE
 "==========================================================================
 
-	let g:NERDTreeWinSize=35												"Set the window size.
+	let g:NERDTreeWinSize=45												"Set the window size.
 	let g:NERDTreeDirArrows=0												"Don't use arrows for the tree.
 	let g:NERDTreeMouseMode=2												"One click to open nodes.
 	let g:NERDTreeShowBookmarks=1											"Show bookmarks on startup.
@@ -235,7 +235,7 @@
 	let g:NERDTreeIgnore += ['\.mkv$', '\.dmg$', '\.msi$', '\.ods$']
 	let g:NERDTreeIgnore += ['\.doc$', '\.lib$', '\.wav$', '\.qxd$']
 	let g:NERDTreeIgnore += ['\.woff$', '\.class$', '\.jar$', '\.ai$']
-	let g:NERDTreeIgnore += ['\.ogg$', '\.blend$', '\.ms3d$', '\.mod$']
+	let g:NERDTreeIgnore += ['\.ogg$', '\.blend$', '\.ms3d$']
 	let g:NERDTreeStatusline='NerdTree'
 
 "==========================================================================
@@ -275,4 +275,4 @@
 	let g:go_fmt_command = "goimports"										"Automatically insert import paths instead of gofmt.
 	let g:go_fmt_autosave = 1												"Auto fmt on save.
 	let g:go_play_open_browser = 1											"Opening browser after posting your snippet to play.golang.org.
-	let g:go_auto_type_info = 0												"Display auto type information.
+	let g:go_auto_type_info = 1												"Display auto type information.
