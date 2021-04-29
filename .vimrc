@@ -37,6 +37,7 @@
 	set backspace=indent,eol,start											"Use backspace to move through text in normal mode.
 	set linebreak															"Word wrap on words not characters.
 	set breakindent															"Handle indenting wrapping lines.
+	set nojoinspaces                                                        "Only insert one space when joining lines.
 
 	set ignorecase															"Case insensitive by default.
 	set smartcase															"Case-sensitive only if there is a capital letter in the expression.
@@ -76,7 +77,7 @@
 	if has('gui_running')
 
 		if has('unix')
-			set guifont=Pragmata\ Pro\ Mono\ 12								"Set the editor font.
+			set guifont=Iosevka\ Term\ Curly\ 12								"Set the editor font.
 		elseif has('mac')
 			set guifont=DeJaVu_Sans_Mono:h12								"Set the editor font.
 		endif
@@ -85,9 +86,9 @@
 		set guicursor=a:blinkon0											"Turn off cursor flashing for all modes.
 		set cursorline														"Highlight current line.
 
-		set lines=65														"Set the initial height of the editor.
+		set lines=58														"Set the initial height of the editor.
 		set columns=199														"Set the initial width of the editor.
-		set linespace=2														"Increase linespace by a few pixels.
+		set linespace=0														"Increase linespace by a few pixels.
 
 		set noerrorbells													"Don't make noise.
 		set novisualbell													"Don't blink.
